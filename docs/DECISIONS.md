@@ -8,7 +8,7 @@ The agent ClusterRole explicitly grants read access to Kubernetes `nodes` becaus
 
 ## Elastic APM Authentication
 
-Elastic Cloud APM is reached through the managed HTTPS endpoint on port 443. The Kubernetes Secret stores an APM secret token, so the gateway uses `Authorization: Bearer ${env:ELASTIC_APM_SECRET_TOKEN}`. Using the same value with an `ApiKey` header produced HTTP 401 responses from `/v1/metrics`.
+Elastic Cloud APM is reached through the managed HTTPS endpoint on port 443. The Kubernetes Secret stores the Elastic API key created from Kibana, so the gateway uses `Authorization: ApiKey ${env:ELASTIC_APM_API_KEY}`. This differs from an APM secret token, which would use a `Bearer` authorization header.
 
 ## Tail Sampling
 
@@ -16,4 +16,16 @@ Tail sampling is configured at the gateway because sampling decisions need the c
 
 ## Current Scope
 
-The collector pipeline has been smoke-tested with a synthetic `test-service` span and live Online Boutique services have tracing enabled for `frontend`, `recommendationservice`, and `paymentservice`. Source-level custom spans and custom metrics are the next implementation step.
+The collector pipeline has been smoke-tested with a synthetic `test-service` span and live Online Boutique services have tracing enabled for `frontend`, `recommendationservice`, and `paymentservice`. The committed instrumentation artifacts focus on the expected assessment services: frontend checkout spans, payment authorization spans, and cartservice memory stability.
+
+## Repository Boundary
+
+The upstream `microservices-demo/` checkout is kept out of the assessment repository. Source-level instrumentation is stored as patch files under `instrumentation/<service>/` so the changes remain reviewable without vendoring the application source.
+
+## Service Naming
+
+Each instrumented deployment sets `OTEL_SERVICE_NAME` explicitly. This prevents Elastic APM from grouping spans under OpenTelemetry fallback names such as `unknown_service` or `unknown_service_server`.
+
+## RUM and Dashboards
+
+RUM is represented as a frontend bootstrap module that initializes Elastic APM RUM with the assessment environment and service version. Kibana dashboards and alerting rules are committed as saved-object NDJSON artifacts so they can be imported, reviewed, and versioned with the rest of the observability configuration.

@@ -1,0 +1,6 @@
+inputs:
+  - type: redis/metrics
+    id: redis-metrics
+    hosts: ["redis://cart-redis:6379"]
+    period: 30s
+    data_stream.namespace: assessment

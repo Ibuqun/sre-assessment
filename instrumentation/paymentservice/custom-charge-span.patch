@@ -1,0 +1,50 @@
+diff --git a/src/paymentservice/server.js b/src/paymentservice/server.js
+index 67271e4..57d5dd3 100644
+--- a/src/paymentservice/server.js
++++ b/src/paymentservice/server.js
+@@ -15,6 +15,7 @@
+ const path = require('path');
+ const grpc = require('@grpc/grpc-js');
+ const protoLoader = require('@grpc/proto-loader');
++const { trace, SpanStatusCode } = require('@opentelemetry/api');
+ 
+ const charge = require('./charge');
+ 
+@@ -39,14 +40,29 @@ class HipsterShopServer {
+    * @param {*} callback  fn(err, ChargeResponse)
+    */
+   static ChargeServiceHandler(call, callback) {
+-    try {
+-      logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
+-      const response = charge(call.request);
+-      callback(null, response);
+-    } catch (err) {
+-      console.warn(err);
+-      callback(err);
+-    }
++    const tracer = trace.getTracer('paymentservice');
++    tracer.startActiveSpan('payment.charge.authorize', span => {
++      try {
++        const amount = call.request.amount || {};
++        const creditCard = call.request.credit_card || {};
++        span.setAttributes({
++          'payment.currency': amount.currency_code || 'unknown',
++          'payment.amount_units': Number(amount.units || 0),
++          'payment.card_last_four': String(creditCard.credit_card_number || '').slice(-4)
++        });
++        logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
++        const response = charge(call.request);
++        span.setAttribute('payment.transaction_id', response.transaction_id);
++        callback(null, response);
++      } catch (err) {
++        span.recordException(err);
++        span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
++        console.warn(err);
++        callback(err);
++      } finally {
++        span.end();
++      }
++    });
+   }
+ 
+   static CheckHandler(call, callback) {

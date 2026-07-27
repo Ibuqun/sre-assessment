@@ -1,0 +1,8 @@
+inputs:
+  - type: postgresql/metrics
+    id: postgres-metrics
+    hosts: ["postgresql://postgres:5432"]
+    username: "${POSTGRES_MONITOR_USER}"
+    password: "${POSTGRES_MONITOR_PASSWORD}"
+    period: 30s
+    data_stream.namespace: assessment

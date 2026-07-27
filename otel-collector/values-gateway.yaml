@@ -3,20 +3,22 @@ replicaCount: 2
 image:
   repository: otel/opentelemetry-collector-contrib
 
-# Elastic APM token is provided from a Kubernetes Secret.
+# Elastic APM API key is provided from a Kubernetes Secret.
 extraEnvs:
-  - name: ELASTIC_APM_SECRET_TOKEN
+  - name: ELASTIC_APM_API_KEY
     valueFrom:
       secretKeyRef:
         name: elastic-apm-credentials
-        key: secret-token
+        key: api-key
 
 config:
   receivers:
     otlp:
       protocols:
-        grpc: {endpoint: 0.0.0.0:4317}
-        http: {endpoint: 0.0.0.0:4318}
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
   processors:
     memory_limiter:
       check_interval: 5s
@@ -49,7 +51,7 @@ config:
       # Elastic Cloud APM endpoint uses standard HTTPS on port 443.
       endpoint: "https://258eb842f48b4c939a05ae34359dfbfb.apm.us-east1.gcp.elastic-cloud.com:443"
       headers:
-        Authorization: "Bearer ${env:ELASTIC_APM_SECRET_TOKEN}"
+        Authorization: "ApiKey ${env:ELASTIC_APM_API_KEY}"
       tls:
         insecure: false
   service:

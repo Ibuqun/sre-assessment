@@ -1,0 +1,6 @@
+inputs:
+  - type: nginx/metrics
+    id: nginx-metrics
+    hosts: ["http://frontend:8080/nginx_status"]
+    period: 30s
+    data_stream.namespace: assessment
