@@ -1,0 +1,75 @@
+--- a/src/cartservice/src/services/CartService.cs
++++ b/src/cartservice/src/services/CartService.cs
+@@ -14,6 +14,9 @@
+ 
+ using System;
+ using System.Threading.Tasks;
++using System.Collections.Generic;
++using System.Diagnostics;
++using System.Diagnostics.Metrics;
+ using Grpc.Core;
+ using Microsoft.Extensions.Logging;
+ using cartservice.cartstore;
+@@ -24,6 +27,9 @@
+     public class CartService : Hipstershop.CartService.CartServiceBase
+     {
+         private readonly static Empty Empty = new Empty();
++        private static readonly ActivitySource ActivitySource = new ActivitySource("cartservice");
++        private static readonly Meter Meter = new Meter("cartservice");
++        private static readonly Counter<long> CartItemsAdded = Meter.CreateCounter<long>("cart.items.added");
+         private readonly ICartStore _cartStore;
+ 
+         public CartService(ICartStore cartStore)
+@@ -33,17 +39,38 @@
+ 
+         public async override Task<Empty> AddItem(AddItemRequest request, ServerCallContext context)
+         {
+-            await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
++            using var activity = ActivitySource.StartActivity("cart.add_item");
++            activity?.SetTag("cart.user_id", request.UserId);
++            activity?.SetTag("cart.product_id", request.Item.ProductId);
++            activity?.SetTag("cart.quantity", request.Item.Quantity);
++            try
++            {
++                await _cartStore.AddItemAsync(request.UserId, request.Item.ProductId, request.Item.Quantity);
++                CartItemsAdded.Add(request.Item.Quantity,
++                    new KeyValuePair<string, object?>("cart.product_id", request.Item.ProductId));
++            }
++            catch (Exception ex)
++            {
++                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
++                activity?.AddException(ex);
++                throw;
++            }
+             return Empty;
+         }
+ 
+-        public override Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
++        public async override Task<Cart> GetCart(GetCartRequest request, ServerCallContext context)
+         {
+-            return _cartStore.GetCartAsync(request.UserId);
++            using var activity = ActivitySource.StartActivity("cart.get_cart");
++            activity?.SetTag("cart.user_id", request.UserId);
++            var cart = await _cartStore.GetCartAsync(request.UserId);
++            activity?.SetTag("cart.item_count", cart.Items.Count);
++            return cart;
+         }
+ 
+         public async override Task<Empty> EmptyCart(EmptyCartRequest request, ServerCallContext context)
+         {
++            using var activity = ActivitySource.StartActivity("cart.empty_cart");
++            activity?.SetTag("cart.user_id", request.UserId);
+             await _cartStore.EmptyCartAsync(request.UserId);
+             return Empty;
+         }
+--- a/src/cartservice/src/cartservice.csproj
++++ b/src/cartservice/src/cartservice.csproj
+@@ -7,6 +7,8 @@
+   <ItemGroup>
+     <PackageReference Include="Grpc.AspNetCore" Version="2.80.0" />
+     <PackageReference Include="Grpc.HealthCheck" Version="2.80.0" />
++    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
++    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
+     <PackageReference Include="Google.Cloud.Spanner.Data" Version="5.12.0" />
+     <PackageReference Include="Npgsql" Version="10.0.3" />

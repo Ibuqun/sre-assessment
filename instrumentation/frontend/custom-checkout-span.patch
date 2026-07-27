@@ -1,28 +1,41 @@
-diff --git a/src/frontend/handlers.go b/src/frontend/handlers.go
-index 33c94d8..6874ebd 100644
 --- a/src/frontend/handlers.go
 +++ b/src/frontend/handlers.go
-@@ -31,6 +31,9 @@ import (
+@@ -31,6 +31,10 @@
  	"github.com/gorilla/mux"
  	"github.com/pkg/errors"
  	"github.com/sirupsen/logrus"
 +	"go.opentelemetry.io/otel"
 +	"go.opentelemetry.io/otel/attribute"
 +	"go.opentelemetry.io/otel/codes"
++	"go.opentelemetry.io/otel/metric"
  
  	pb "github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto"
  	"github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money"
-@@ -321,6 +324,9 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
+@@ -53,6 +57,9 @@
+ 		}).ParseGlob("templates/*.html"))
+ 	plat platformDetails
+ )
++
++var checkoutAttempts, _ = otel.Meter("frontend").Int64Counter("frontend.checkout.attempts",
++	metric.WithDescription("Checkout attempts submitted through the frontend"))
+ 
+ var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
+ 
+@@ -320,6 +327,13 @@
+ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Request) {
  	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
  	log.Debug("placing order")
- 
++
 +	ctx, span := otel.Tracer("frontend").Start(r.Context(), "frontend.checkout.place_order")
 +	defer span.End()
-+
++	checkoutAttempts.Add(ctx, 1, metric.WithAttributes(
++		attribute.String("checkout.currency", currentCurrency(r)),
++		attribute.String("checkout.route", "/cart/checkout"),
++	))
+ 
  	var (
  		email         = r.FormValue("email")
- 		streetAddress = r.FormValue("street_address")
-@@ -347,12 +353,18 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
+@@ -347,12 +361,20 @@
  		CcCVV:         ccCVV,
  	}
  	if err := payload.Validate(); err != nil {
@@ -36,18 +49,22 @@ index 33c94d8..6874ebd 100644
 +		attribute.String("checkout.destination_country", payload.Country),
 +	)
  
++	ctx, rpcSpan := otel.Tracer("frontend").Start(ctx, "frontend.checkout.call_checkoutservice")
++	defer rpcSpan.End()
  	order, err := pb.NewCheckoutServiceClient(fe.checkoutSvcConn).
 -		PlaceOrder(r.Context(), &pb.PlaceOrderRequest{
 +		PlaceOrder(ctx, &pb.PlaceOrderRequest{
  			Email: payload.Email,
  			CreditCard: &pb.CreditCardInfo{
  				CreditCardNumber:          payload.CcNumber,
-@@ -369,9 +381,15 @@ func (fe *frontendServer) placeOrderHandler(w http.ResponseWriter, r *http.Reque
+@@ -369,9 +391,18 @@
  				Country:       payload.Country},
  		})
  	if err != nil {
 +		span.SetStatus(codes.Error, "checkout service failed")
 +		span.RecordError(err)
++		rpcSpan.SetStatus(codes.Error, "checkout service failed")
++		rpcSpan.RecordError(err)
  		renderHTTPError(log, r, w, errors.Wrap(err, "failed to complete the order"), http.StatusInternalServerError)
  		return
  	}
@@ -55,6 +72,7 @@ index 33c94d8..6874ebd 100644
 +		attribute.String("checkout.order_id", order.GetOrder().GetOrderId()),
 +		attribute.Int("checkout.item_count", len(order.GetOrder().GetItems())),
 +	)
++	rpcSpan.SetAttributes(attribute.String("checkout.order_id", order.GetOrder().GetOrderId()))
  	log.WithField("order", order.GetOrder().GetOrderId()).Info("order placed")
  
  	order.GetOrder().GetItems()

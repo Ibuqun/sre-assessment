@@ -1,16 +1,27 @@
-diff --git a/src/paymentservice/server.js b/src/paymentservice/server.js
-index 67271e4..57d5dd3 100644
 --- a/src/paymentservice/server.js
 +++ b/src/paymentservice/server.js
-@@ -15,6 +15,7 @@
+@@ -15,11 +15,20 @@
  const path = require('path');
  const grpc = require('@grpc/grpc-js');
  const protoLoader = require('@grpc/proto-loader');
-+const { trace, SpanStatusCode } = require('@opentelemetry/api');
++const { metrics, trace, SpanStatusCode } = require('@opentelemetry/api');
  
  const charge = require('./charge');
  
-@@ -39,14 +40,29 @@ class HipsterShopServer {
+ const logger = require('./logger')
+ 
++const meter = metrics.getMeter('paymentservice');
++const chargeAttempts = meter.createCounter('payment.charge.attempts', {
++  description: 'Payment charge attempts processed by paymentservice'
++});
++const chargeAmount = meter.createHistogram('payment.charge.amount', {
++  description: 'Payment charge amount in whole currency units'
++});
++
+ class HipsterShopServer {
+   constructor(protoRoot, port = HipsterShopServer.PORT) {
+     this.port = port;
+@@ -39,14 +48,43 @@
     * @param {*} callback  fn(err, ChargeResponse)
     */
    static ChargeServiceHandler(call, callback) {
@@ -27,11 +38,25 @@ index 67271e4..57d5dd3 100644
 +      try {
 +        const amount = call.request.amount || {};
 +        const creditCard = call.request.credit_card || {};
++        const cardNumber = String(creditCard.credit_card_number || '');
 +        span.setAttributes({
 +          'payment.currency': amount.currency_code || 'unknown',
 +          'payment.amount_units': Number(amount.units || 0),
-+          'payment.card_last_four': String(creditCard.credit_card_number || '').slice(-4)
++          'payment.card_last_four': cardNumber.slice(-4)
 +        });
++        chargeAttempts.add(1, {
++          'payment.currency': amount.currency_code || 'unknown',
++          'payment.card_brand_hint': cardNumber.startsWith('4') ? 'visa' : 'other'
++        });
++        chargeAmount.record(Number(amount.units || 0), {
++          'payment.currency': amount.currency_code || 'unknown'
++        });
++        const validationSpan = tracer.startSpan('payment.card.validate');
++        validationSpan.setAttributes({
++          'payment.card_last_four': cardNumber.slice(-4),
++          'payment.card_brand_hint': cardNumber.startsWith('4') ? 'visa' : 'other'
++        });
++        validationSpan.end();
 +        logger.info(`PaymentService#Charge invoked with request ${JSON.stringify(call.request)}`);
 +        const response = charge(call.request);
 +        span.setAttribute('payment.transaction_id', response.transaction_id);

@@ -16,7 +16,7 @@ Tail sampling is configured at the gateway because sampling decisions need the c
 
 ## Current Scope
 
-The collector pipeline has been smoke-tested with a synthetic `test-service` span and live Online Boutique services have tracing enabled for `frontend`, `recommendationservice`, and `paymentservice`. The committed instrumentation artifacts focus on the expected assessment services: frontend checkout spans, payment authorization spans, and cartservice memory stability.
+The collector pipeline has been smoke-tested with a synthetic `test-service` span and live Online Boutique services have tracing enabled for `frontend`, `recommendationservice`, and `paymentservice`. The committed instrumentation artifacts focus on three assessment languages: frontend Go checkout spans and checkout-attempt metrics, paymentservice Node.js payment authorization/card-validation spans and payment metrics, and cartservice C# cart operation spans with a cart-items-added metric.
 
 ## Repository Boundary
 
@@ -31,6 +31,8 @@ Each instrumented deployment sets `OTEL_SERVICE_NAME` explicitly. This prevents 
 RUM is represented as a frontend bootstrap module that initializes Elastic APM RUM with the assessment environment and service version. Kibana dashboards and alerting rules are committed as saved-object NDJSON artifacts so they can be imported, reviewed, and versioned with the rest of the observability configuration.
 
 The RUM integration is split into a static bootstrap script and a frontend template patch. This keeps the browser instrumentation independent of a JavaScript bundler, which matches the upstream Go frontend's static asset model.
+
+The dashboard exports use saved-search panels backed by the APM data view because this format imported reliably through the available Kibana API in the assessment environment. In a production handoff, the same queries would normally be promoted into Lens gauges, percentile charts, and controls for richer visual hierarchy.
 
 ## Kubernetes Patching
 

@@ -21,6 +21,7 @@ Use this file to capture the final proof points for the SRE assessment.
 
 - `instrumentation/frontend/custom-checkout-span.patch` applies to the upstream `microservices-demo` checkout.
 - `instrumentation/paymentservice/custom-charge-span.patch` applies to the upstream `microservices-demo` checkout.
+- `instrumentation/cartservice/custom-cart-telemetry.patch` adds C# cart operation spans and a cart item counter.
 - `instrumentation/frontend/rum-template.patch` applies to the upstream `microservices-demo` checkout.
 - `rum/browser-rum.js` is copied to the frontend static assets as `static/rum.js` when rebuilding the frontend image.
 
@@ -39,6 +40,7 @@ Use this file to capture the final proof points for the SRE assessment.
 - Tail sampling keeps high-value traces while limiting storage growth from normal successful traffic.
 - Explicit `OTEL_SERVICE_NAME` prevents OpenTelemetry fallback service names in Kibana.
 - Source instrumentation is stored as patches because the upstream application checkout is not part of this assessment repo.
+- The instrumentation artifacts cover three languages: Go frontend, Node.js paymentservice, and C# cartservice.
 
 ## Captured Evidence
 

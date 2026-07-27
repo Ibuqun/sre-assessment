@@ -41,15 +41,17 @@ Apply the service overlays:
 ```bash
 kubectl patch deploy frontend -n boutique --type strategic --patch-file instrumentation/frontend/otel-env-patch.yaml
 kubectl patch deploy paymentservice -n boutique --type strategic --patch-file instrumentation/paymentservice/otel-env-patch.yaml
+kubectl patch deploy cartservice -n boutique --type strategic --patch-file instrumentation/cartservice/otel-env-patch.yaml
 kubectl patch deploy cartservice -n boutique --type strategic --patch-file instrumentation/cartservice/stability-patch.yaml
 ```
 
-Apply source-level patches to the upstream Online Boutique checkout/payment services when rebuilding service images:
+Apply source-level patches to the upstream Online Boutique checkout/payment/cart services when rebuilding service images:
 
 ```bash
 git -C microservices-demo apply ../instrumentation/frontend/custom-checkout-span.patch
 git -C microservices-demo apply ../instrumentation/frontend/rum-template.patch
 git -C microservices-demo apply ../instrumentation/paymentservice/custom-charge-span.patch
+git -C microservices-demo apply ../instrumentation/cartservice/custom-cart-telemetry.patch
 cp rum/browser-rum.js microservices-demo/src/frontend/static/rum.js
 ```
 
@@ -70,11 +72,12 @@ For the upstream Go frontend, apply `instrumentation/frontend/rum-template.patch
 During review, walk through these checks:
 
 1. `frontend` and `paymentservice` appear as named APM services after fresh traffic.
-2. Checkout traces flow through frontend, cart, checkout, payment, and downstream services.
-3. Error and slow traces are retained by the gateway tail-sampling policy.
-4. Collector self-metrics are exposed on port `8888`.
-5. Infrastructure files show how Kubernetes logs plus Postgres, Redis, and Nginx metrics would be collected by Elastic Agent.
-6. `docs/EVIDENCE.md` contains the final checklist for screenshots and live verification notes.
+2. Frontend, paymentservice, and cartservice have language-specific instrumentation patches with business spans and metrics.
+3. Checkout traces flow through frontend, cart, checkout, payment, and downstream services.
+4. Error and slow traces are retained by the gateway tail-sampling policy.
+5. Collector self-metrics are exposed on port `8888`.
+6. Infrastructure files show how Kubernetes logs plus Postgres, Redis, and Nginx metrics would be collected by Elastic Agent.
+7. `docs/EVIDENCE.md` contains the final checklist for screenshots and live verification notes.
 
 ## Key Tradeoffs
 
