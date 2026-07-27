@@ -29,6 +29,7 @@ Use this file to capture the final proof points for the SRE assessment.
 - `dashboards/service-health.ndjson` imports successfully.
 - `dashboards/rum-performance.ndjson` imports successfully.
 - `dashboards/business-transactions.ndjson` imports successfully.
+- The imported Kibana dashboards contain live saved-search panels backed by the APM data view.
 - `infrastructure/alerting-rules/sre-alerts.ndjson` imports successfully.
 
 ## Review Talking Points
@@ -68,6 +69,10 @@ Fresh traffic was generated through browser browsing, add-to-cart, checkout, and
 [Live frontend checkout logs](./evidence/live-custom-frontend-checkout.txt)
 
 [Live paymentservice charge logs](./evidence/live-custom-paymentservice.txt)
+
+[Kibana dashboard import verification](./evidence/kibana-dashboard-import.txt)
+
+[Elastic RUM intake verification](./evidence/rum-intake-verification.txt)
 
 ### Kibana APM
 

@@ -1,0 +1,16 @@
+Elastic RUM intake verification
+Date: 2026-07-27
+
+Frontend deployment checks:
+- The served frontend HTML includes the Elastic APM RUM browser agent script.
+- The served frontend HTML includes /static/rum.js.
+- /static/rum.js returns HTTP 200.
+
+RUM endpoint checks:
+- OPTIONS /intake/v2/rum/events returned HTTP 200.
+- Access-Control-Allow-Origin matched the local frontend origin.
+- POST /intake/v2/rum/events returned HTTP 202 for service.name=online-boutique-frontend.
+
+Interpretation:
+- RUM support and anonymous browser intake are enabled on the Elastic APM endpoint.
+- The online-boutique-frontend service name is accepted by the APM RUM intake path.
