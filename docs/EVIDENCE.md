@@ -59,6 +59,16 @@ Fresh traffic was generated through browser browsing, add-to-cart, checkout, and
 
 [Gateway log summary](./evidence/gateway-log-summary.txt)
 
+[Live custom-span pod readiness](./evidence/live-custom-pods.txt)
+
+[Live patched images and resources](./evidence/live-custom-images.txt)
+
+[Live custom-span gateway error check](./evidence/live-custom-gateway-errors.txt)
+
+[Live frontend checkout logs](./evidence/live-custom-frontend-checkout.txt)
+
+[Live paymentservice charge logs](./evidence/live-custom-paymentservice.txt)
+
 ### Kibana APM
 
 ![APM services](./evidence/apm-services.png)

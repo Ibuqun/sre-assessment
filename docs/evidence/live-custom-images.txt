@@ -1,0 +1,6 @@
+frontend	sre-assessment/frontend:custom-rum-spans	{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"200m","memory":"128Mi"}}
+paymentservice	sre-assessment/paymentservice:custom-spans	{"limits":{"cpu":"200m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}
+cartservice	us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/cartservice:v0.10.6	{"limits":{"cpu":"300m","memory":"512Mi"},"requests":{"cpu":"200m","memory":"128Mi"}}
+currencyservice	us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/currencyservice:v0.10.6	{"limits":{"cpu":"200m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}
+productcatalogservice	us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/productcatalogservice:v0.10.6	{"limits":{"cpu":"200m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}
+shippingservice	us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/shippingservice:v0.10.6	{"limits":{"cpu":"200m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}

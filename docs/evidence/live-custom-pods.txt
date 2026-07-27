@@ -1,0 +1,14 @@
+NAME                                    READY   STATUS    RESTARTS        AGE     IP            NODE                           NOMINATED NODE   READINESS GATES
+cartservice-5bbd476cd4-nsnfr            1/1     Running   1 (9m37s ago)   10m     10.244.0.66   sre-assessment-control-plane   <none>           <none>
+checkoutservice-8458467c66-7nhc5        1/1     Running   2 (33m ago)     7h30m   10.244.0.12   sre-assessment-control-plane   <none>           <none>
+currencyservice-65578b8c77-xmtqs        1/1     Running   1 (9m48s ago)   10m     10.244.0.65   sre-assessment-control-plane   <none>           <none>
+frontend-5ccff97975-7hckg               1/1     Running   0               10m     10.244.0.67   sre-assessment-control-plane   <none>           <none>
+paymentservice-6655d57c74-lcst9         1/1     Running   1 (9m46s ago)   10m     10.244.0.68   sre-assessment-control-plane   <none>           <none>
+pg-postgresql-0                         1/1     Running   0               7h7m    10.244.0.18   sre-assessment-control-plane   <none>           <none>
+productcatalogservice-79d464955-t249f   1/1     Running   0               10m     10.244.0.64   sre-assessment-control-plane   <none>           <none>
+redis-cart-788fbddc7-7tmv9              1/1     Running   0               7h30m   10.244.0.9    sre-assessment-control-plane   <none>           <none>
+redis-master-0                          1/1     Running   0               7h7m    10.244.0.21   sre-assessment-control-plane   <none>           <none>
+redis-replicas-0                        1/1     Running   3 (33m ago)     7h7m    10.244.0.22   sre-assessment-control-plane   <none>           <none>
+redis-replicas-1                        1/1     Running   4 (33m ago)     7h5m    10.244.0.24   sre-assessment-control-plane   <none>           <none>
+redis-replicas-2                        1/1     Running   4 (14m ago)     7h5m    10.244.0.26   sre-assessment-control-plane   <none>           <none>
+shippingservice-d6c7455c9-t5wrr         1/1     Running   0               10m     10.244.0.63   sre-assessment-control-plane   <none>           <none>
