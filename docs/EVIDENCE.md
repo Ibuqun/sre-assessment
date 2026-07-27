@@ -32,6 +32,14 @@ Use this file to capture the final proof points for the SRE assessment.
 - `dashboards/business-transactions.ndjson` imports successfully.
 - The imported Kibana dashboards contain live saved-search panels backed by the APM data view.
 - `infrastructure/alerting-rules/sre-alerts.ndjson` imports successfully.
+- Alert artifacts cover APM, host, PostgreSQL, Redis, network-policy, and NGINX failure modes.
+
+## Infrastructure Monitoring
+
+- `infrastructure/elastic-agent-policies/agent.yml` defines system metrics/logs, Kubernetes container logs, Kubernetes audit logs, and network-policy flow-log inputs.
+- `infrastructure/postgres-integration/postgres.yml` defines PostgreSQL metrics and log collection.
+- `infrastructure/redis-integration/redis.yml` defines Redis metrics and slowlog collection.
+- `infrastructure/nginx-integration/nginx.yml` defines NGINX metrics, access logs, and error logs.
 
 ## Review Talking Points
 
@@ -41,6 +49,7 @@ Use this file to capture the final proof points for the SRE assessment.
 - Explicit `OTEL_SERVICE_NAME` prevents OpenTelemetry fallback service names in Kibana.
 - Source instrumentation is stored as patches because the upstream application checkout is not part of this assessment repo.
 - The instrumentation artifacts cover three languages: Go frontend, Node.js paymentservice, and C# cartservice.
+- Alerting is split by symptom: user-impacting APM failures, host saturation, data-store pressure, unexpected egress, and load-balancer upstream failures.
 
 ## Captured Evidence
 

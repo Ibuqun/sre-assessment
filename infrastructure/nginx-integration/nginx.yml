@@ -4,3 +4,25 @@ inputs:
     hosts: ["http://frontend:8080/nginx_status"]
     period: 30s
     data_stream.namespace: assessment
+    metricsets:
+      - stubstatus
+
+  - type: filestream
+    id: nginx-access-logs
+    paths:
+      - /var/log/nginx/access.log
+      - /var/log/containers/*ingress-nginx-controller*_ingress-nginx_*.log
+    parsers:
+      - ndjson:
+          target: ""
+          add_error_key: true
+    data_stream.dataset: nginx.access
+    data_stream.namespace: assessment
+
+  - type: filestream
+    id: nginx-error-logs
+    paths:
+      - /var/log/nginx/error.log
+      - /var/log/containers/*ingress-nginx-controller*_ingress-nginx_*.log
+    data_stream.dataset: nginx.error
+    data_stream.namespace: assessment

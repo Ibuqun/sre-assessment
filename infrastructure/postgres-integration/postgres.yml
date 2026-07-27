@@ -6,3 +6,22 @@ inputs:
     password: "${POSTGRES_MONITOR_PASSWORD}"
     period: 30s
     data_stream.namespace: assessment
+    metricsets:
+      - activity
+      - bgwriter
+      - database
+      - statement
+
+  - type: filestream
+    id: postgres-logs
+    paths:
+      - /var/log/postgresql/*.log
+      - /var/lib/postgresql/data/log/*.log
+    parsers:
+      - multiline:
+          type: pattern
+          pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+          negate: true
+          match: after
+    data_stream.dataset: postgresql.log
+    data_stream.namespace: assessment

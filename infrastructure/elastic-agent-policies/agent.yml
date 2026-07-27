@@ -12,6 +12,43 @@ agent:
     metrics: true
 
 inputs:
+  - id: system-metrics
+    type: system/metrics
+    use_output: default
+    streams:
+      - id: system-cpu
+        metricsets: [cpu]
+        period: 30s
+      - id: system-memory
+        metricsets: [memory]
+        period: 30s
+      - id: system-filesystem
+        metricsets: [filesystem, fsstat]
+        period: 30s
+      - id: system-diskio
+        metricsets: [diskio]
+        period: 30s
+      - id: system-network
+        metricsets: [network]
+        period: 30s
+      - id: system-load
+        metricsets: [load]
+        period: 30s
+      - id: system-process-summary
+        metricsets: [process_summary]
+        period: 30s
+
+  - id: system-logs
+    type: logfile
+    use_output: default
+    streams:
+      - id: syslog
+        paths: ["/var/log/syslog", "/var/log/messages"]
+        data_stream.dataset: system.syslog
+      - id: authlog
+        paths: ["/var/log/auth.log", "/var/log/secure"]
+        data_stream.dataset: system.auth
+
   - id: kubernetes-container-logs
     type: filestream
     use_output: default
@@ -24,3 +61,26 @@ inputs:
         processors:
           - add_kubernetes_metadata:
               host: ${NODE_NAME}
+
+  - id: kubernetes-audit-and-flow-logs
+    type: filestream
+    use_output: default
+    streams:
+      - id: kubernetes-audit
+        paths:
+          - /var/log/kubernetes/audit/*.log
+          - /var/log/audit/kube-apiserver-audit.log
+        parsers:
+          - ndjson:
+              target: ""
+              add_error_key: true
+        data_stream.dataset: kubernetes.audit
+      - id: network-policy-flow-logs
+        paths:
+          - /var/log/calico/flowlogs/*.log
+          - /var/log/cilium/flow/*.log
+        parsers:
+          - ndjson:
+              target: ""
+              add_error_key: true
+        data_stream.dataset: kubernetes.network_policy

@@ -37,3 +37,11 @@ The dashboard exports use saved-search panels backed by the APM data view becaus
 ## Kubernetes Patching
 
 The service overlay files are strategic-merge patches for existing Online Boutique Deployments. Strategic merge is used because Kubernetes can merge container entries by name instead of replacing the whole container list. This keeps the patches small and avoids copying unrelated deployment settings from the upstream manifests.
+
+## Infrastructure Monitoring
+
+Elastic Agent policy artifacts are used for host and infrastructure monitoring because the assessment backend is Elastic/Fleet-centered and the same policy can be enrolled on the bastion, CI runner, or cluster nodes without committing credentials. The policy includes system metrics/logs, Kubernetes container logs, Kubernetes audit logs, and CNI flow-log style inputs for network-policy auditing.
+
+PostgreSQL, Redis, and NGINX are split into separate integration files so each can be reviewed and tuned independently. Metrics and logs are both represented where the assessment requires operational troubleshooting, such as PostgreSQL slow-query logs, Redis slowlog data, and NGINX access/error logs.
+
+Alerting is intentionally multi-signal: APM rules catch checkout/payment user impact, host rules catch compute saturation, data-store rules catch capacity and performance degradation, network-policy rules catch unexpected egress, and NGINX rules catch load-balancer and upstream availability symptoms. The committed rule exports omit connector secrets; actions can be wired to Slack/webhook/email in the target Kibana space.

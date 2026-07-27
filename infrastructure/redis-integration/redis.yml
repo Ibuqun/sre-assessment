@@ -4,3 +4,15 @@ inputs:
     hosts: ["redis://cart-redis:6379"]
     period: 30s
     data_stream.namespace: assessment
+    metricsets:
+      - info
+      - keyspace
+
+  - type: redis/metrics
+    id: redis-slowlog
+    hosts: ["redis://cart-redis:6379"]
+    period: 60s
+    data_stream.dataset: redis.slowlog
+    data_stream.namespace: assessment
+    metricsets:
+      - slowlog
