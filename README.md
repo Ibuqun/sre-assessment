@@ -48,7 +48,9 @@ Apply source-level patches to the upstream Online Boutique checkout/payment serv
 
 ```bash
 git -C microservices-demo apply ../instrumentation/frontend/custom-checkout-span.patch
+git -C microservices-demo apply ../instrumentation/frontend/rum-template.patch
 git -C microservices-demo apply ../instrumentation/paymentservice/custom-charge-span.patch
+cp rum/browser-rum.js microservices-demo/src/frontend/static/rum.js
 ```
 
 ## Kibana
@@ -61,6 +63,8 @@ After generating fresh traffic, use a short time range such as Last 15 minutes a
 
 Wire `rum/browser-rum.js` into the frontend bundle and set `window.__ELASTIC_APM_RUM_SERVER_URL__` to the Elastic APM RUM endpoint.
 
+For the upstream Go frontend, apply `instrumentation/frontend/rum-template.patch` and copy `rum/browser-rum.js` to `microservices-demo/src/frontend/static/rum.js` before rebuilding the frontend image.
+
 ## What to Demonstrate
 
 During review, walk through these checks:
@@ -70,6 +74,7 @@ During review, walk through these checks:
 3. Error and slow traces are retained by the gateway tail-sampling policy.
 4. Collector self-metrics are exposed on port `8888`.
 5. Infrastructure files show how Kubernetes logs plus Postgres, Redis, and Nginx metrics would be collected by Elastic Agent.
+6. `docs/EVIDENCE.md` contains the final checklist for screenshots and live verification notes.
 
 ## Key Tradeoffs
 

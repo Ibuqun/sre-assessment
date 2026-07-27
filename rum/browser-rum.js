@@ -1,7 +1,9 @@
-import { init as initApm } from "@elastic/apm-rum";
+(function () {
+  if (!window.elasticApm || !window.__ELASTIC_APM_RUM_SERVER_URL__) {
+    return;
+  }
 
-export function initRum() {
-  return initApm({
+  window.elasticApm.init({
     serviceName: "online-boutique-frontend",
     serviceVersion: "1.0.0",
     environment: "assessment",
@@ -9,6 +11,6 @@ export function initRum() {
     distributedTracingOrigins: [window.location.origin],
     transactionSampleRate: 1.0,
     breakdownMetrics: true,
-    captureBody: "errors",
+    captureBody: "errors"
   });
-}
+})();

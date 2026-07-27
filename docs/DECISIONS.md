@@ -30,6 +30,8 @@ Each instrumented deployment sets `OTEL_SERVICE_NAME` explicitly. This prevents 
 
 RUM is represented as a frontend bootstrap module that initializes Elastic APM RUM with the assessment environment and service version. Kibana dashboards and alerting rules are committed as saved-object NDJSON artifacts so they can be imported, reviewed, and versioned with the rest of the observability configuration.
 
+The RUM integration is split into a static bootstrap script and a frontend template patch. This keeps the browser instrumentation independent of a JavaScript bundler, which matches the upstream Go frontend's static asset model.
+
 ## Kubernetes Patching
 
 The service overlay files are strategic-merge patches for existing Online Boutique Deployments. Strategic merge is used because Kubernetes can merge container entries by name instead of replacing the whole container list. This keeps the patches small and avoids copying unrelated deployment settings from the upstream manifests.

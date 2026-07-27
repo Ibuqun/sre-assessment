@@ -1,0 +1,40 @@
+# Assessment Evidence Checklist
+
+Use this file to capture the final proof points for the SRE assessment.
+
+## Collector
+
+- `kubectl get pods -n observability` shows healthy `otel-agent` DaemonSet pods.
+- `kubectl get pods -n observability` shows healthy `otel-gateway` replicas.
+- `kubectl logs -n observability deploy/otel-gateway-opentelemetry-collector` has no exporter authentication errors.
+- Collector self-metrics are reachable on port `8888`.
+
+## APM
+
+- Kibana APM Services shows `frontend` after fresh traffic.
+- Kibana APM Services shows `paymentservice` after checkout traffic.
+- Fresh traces do not appear under `unknown_service` or `unknown_service_server`.
+- Checkout trace contains frontend and payment spans.
+- Error or slow transactions are retained by the gateway tail-sampling policy.
+
+## Instrumentation
+
+- `instrumentation/frontend/custom-checkout-span.patch` applies to the upstream `microservices-demo` checkout.
+- `instrumentation/paymentservice/custom-charge-span.patch` applies to the upstream `microservices-demo` checkout.
+- `instrumentation/frontend/rum-template.patch` applies to the upstream `microservices-demo` checkout.
+- `rum/browser-rum.js` is copied to the frontend static assets as `static/rum.js` when rebuilding the frontend image.
+
+## Kibana
+
+- `dashboards/service-health.ndjson` imports successfully.
+- `dashboards/rum-performance.ndjson` imports successfully.
+- `dashboards/business-transactions.ndjson` imports successfully.
+- `infrastructure/alerting-rules/sre-alerts.ndjson` imports successfully.
+
+## Review Talking Points
+
+- Agent/gateway topology separates node-local telemetry intake from centralized export and sampling.
+- API key authentication uses `Authorization: ApiKey ...`; APM secret tokens would use `Bearer ...`.
+- Tail sampling keeps high-value traces while limiting storage growth from normal successful traffic.
+- Explicit `OTEL_SERVICE_NAME` prevents OpenTelemetry fallback service names in Kibana.
+- Source instrumentation is stored as patches because the upstream application checkout is not part of this assessment repo.

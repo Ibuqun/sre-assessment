@@ -1,0 +1,16 @@
+diff --git a/src/frontend/templates/footer.html b/src/frontend/templates/footer.html
+index 8e03b95..7d4ec17 100644
+--- a/src/frontend/templates/footer.html
++++ b/src/frontend/templates/footer.html
+@@ -50,6 +50,11 @@
+ <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+     integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous">
+ </script>
++<script src="https://unpkg.com/@elastic/apm-rum@5/dist/bundles/elastic-apm-rum.umd.min.js" crossorigin="anonymous"></script>
++<script>
++    window.__ELASTIC_APM_RUM_SERVER_URL__ = window.__ELASTIC_APM_RUM_SERVER_URL__ || "";
++</script>
++<script src="{{ $.baseUrl }}/static/rum.js"></script>
+ </body>
+ 
+ </html>
