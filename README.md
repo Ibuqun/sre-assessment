@@ -1,6 +1,6 @@
 # SRE Assessment
 
-This repository contains the observability files for Google Online Boutique.
+This repository contains observability artifacts for Google Online Boutique.
 
 It includes these artifacts:
 
@@ -11,6 +11,11 @@ It includes these artifacts:
 - Elastic Agent files for infrastructure monitoring.
 - Kibana alert rule exports.
 
+The live-verified scope is APM traces, custom spans, RUM intake, dashboard imports, and Kibana alert rule creation.
+
+The infrastructure monitoring files are deployable Elastic Agent artifacts.
+PostgreSQL, Redis, NGINX, host, and network-policy ingestion were not live-verified in Kibana during this run.
+
 ## Layout
 
 - `otel-collector/`: OpenTelemetry Collector Helm values for the node-local agent and central gateway.
@@ -18,22 +23,26 @@ It includes these artifacts:
 - `rum/`: Elastic browser RUM bootstrap code.
 - `dashboards/`: Kibana saved object exports.
 - `infrastructure/`: Elastic Agent integrations and alerting rule exports.
-- `docs/`: Architectural decision log.
+- `docs/`: Architectural decisions and evidence.
 
 ## Collector Deployment
 
 Create the Elastic APM API key secret in the collector namespace:
 
 ```bash
-kubectl create namespace observability
+kubectl create namespace observability --dry-run=client -o yaml | kubectl apply -f -
 kubectl create secret generic elastic-apm-credentials \
   -n observability \
-  --from-literal=api-key="$ELASTIC_APM_API_KEY"
+  --from-literal=api-key="$ELASTIC_APM_API_KEY" \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 Install the gateway and agent with the OpenTelemetry Helm chart:
 
 ```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+
 helm upgrade --install otel-gateway open-telemetry/opentelemetry-collector \
   -n observability \
   -f otel-collector/values-gateway.yaml
@@ -54,7 +63,7 @@ kubectl patch deploy cartservice -n boutique --type strategic --patch-file instr
 kubectl patch deploy cartservice -n boutique --type strategic --patch-file instrumentation/cartservice/stability-patch.yaml
 ```
 
-Apply the source patches before you rebuild the service images:
+Apply the source patches to a local checkout of the upstream `microservices-demo` repo before you rebuild the service images:
 
 ```bash
 git -C microservices-demo apply ../instrumentation/frontend/custom-checkout-span.patch
@@ -68,9 +77,9 @@ cp rum/browser-rum.js microservices-demo/src/frontend/static/rum.js
 
 Import saved objects from `dashboards/*.ndjson` and `infrastructure/alerting-rules/*.ndjson`.
 
-After you generate traffic, set the time range to Last 15 minutes.
+After traffic is generated, set the time range to Last 15 minutes.
 
-Make sure that new traces appear under `frontend` and `paymentservice`.
+New traces appear under `frontend`, `paymentservice`, and `recommendationservice`.
 
 Older `unknown_service` entries can remain visible in older time ranges.
 
@@ -96,7 +105,7 @@ For the upstream Go frontend, apply `instrumentation/frontend/rum-template.patch
 
 Then copy `rum/browser-rum.js` to `microservices-demo/src/frontend/static/rum.js`.
 
-Then rebuild the frontend image.
+Rebuild the frontend image after the file is copied.
 
 ## Review Evidence
 
@@ -107,7 +116,7 @@ The evidence file records the validated scope of the submission:
 3. Checkout traces include frontend, cart, checkout, payment, and downstream work.
 4. Gateway tail sampling retains error, slow, checkout, and payment traces.
 5. Collector self-metrics are exposed on port `8888`.
-6. Elastic Agent files define host, Kubernetes, Postgres, Redis, and NGINX monitoring after deployment.
+6. Elastic Agent files define host, Kubernetes, Postgres, Redis, and NGINX monitoring for later deployment.
 7. Alert rules cover application, host, database, cache, network-policy, and load-balancer failure modes.
 8. `docs/EVIDENCE.md` contains the final checklist and screenshot references.
 
