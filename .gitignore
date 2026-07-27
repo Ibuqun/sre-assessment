@@ -1,2 +1,3 @@
 microservices-demo/
 .DS_Store
+.cache/
