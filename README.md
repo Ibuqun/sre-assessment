@@ -98,18 +98,18 @@ Then copy `rum/browser-rum.js` to `microservices-demo/src/frontend/static/rum.js
 
 Then rebuild the frontend image.
 
-## What to Demonstrate
+## Review Evidence
 
-During review, walk through these checks:
+The evidence file records the validated scope of the submission:
 
 1. `frontend` and `paymentservice` appear as named APM services after fresh traffic.
-2. The repo has instrumentation patches for Go, Node.js, and C# services.
-3. Checkout traces flow through frontend, cart, checkout, payment, and downstream services.
-4. Error and slow traces are retained by the gateway tail-sampling policy.
+2. Instrumentation patches are included for Go, Node.js, and C# services.
+3. Checkout traces include frontend, cart, checkout, payment, and downstream work.
+4. Gateway tail sampling retains error, slow, checkout, and payment traces.
 5. Collector self-metrics are exposed on port `8888`.
-6. Infrastructure files show how Elastic Agent will collect host, Kubernetes, Postgres, Redis, and NGINX data after deployment.
+6. Elastic Agent files define host, Kubernetes, Postgres, Redis, and NGINX monitoring after deployment.
 7. Alert rules cover application, host, database, cache, network-policy, and load-balancer failure modes.
-8. `docs/EVIDENCE.md` contains the final checklist and screenshots.
+8. `docs/EVIDENCE.md` contains the final checklist and screenshot references.
 
 ## Key Tradeoffs
 
