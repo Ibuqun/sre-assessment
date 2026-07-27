@@ -1,0 +1,73 @@
+# sampling-policy.yaml
+#
+# Tail-sampling policy for the OTel Collector Gateway (otel-collector/values-gateway.yaml).
+# Lives in the gateway's `processors.tail_sampling` block — extracted here as a
+# standalone file so the sampling strategy is reviewable/defensible on its own,
+# separate from the rest of the collector's plumbing config.
+#
+# WHY TAIL SAMPLING (not head sampling):
+#   Head sampling decides whether to keep a trace at its very first span, before
+#   any downstream service has run — so it has no idea yet whether the trace will
+#   end in an error. That means it randomly discards error traces at the same rate
+#   as successful ones, which is exactly the data you need most when debugging.
+#   Tail sampling waits until all spans for a trace have arrived at the gateway,
+#   then decides based on the complete picture (did it error? how slow was it?).
+#   The trade-off is the `decision_wait` delay and needing a central point (the
+#   gateway) that sees every span for a trace before deciding — which is precisely
+#   why sampling logic lives at the gateway and not the per-node agent.
+
+decision_wait: 10s        # how long the gateway buffers a trace's spans before
+                           # making a keep/drop decision. Must be long enough to
+                           # cover the slowest realistic end-to-end request
+                           # (checkout flow across ~7 hops); too long and you delay
+                           # export + increase gateway memory pressure.
+
+num_traces: 50000         # max concurrent traces held in memory while awaiting
+                           # a decision. Sized for assessment-scale traffic; in
+                           # production this would be tuned against actual gateway
+                           # memory limits and real request volume.
+
+expected_new_traces_per_sec: 10
+
+policies:
+  # 1. Always keep anything that errored — non-negotiable. Errors are rare
+  #    relative to total traffic and disproportionately valuable for debugging;
+  #    dropping any of them for storage savings is a bad trade every time.
+  - name: always-sample-errors
+    type: status_code
+    status_code:
+      status_codes: [ERROR]
+
+  # 2. Always keep anything unusually slow, even if it technically succeeded.
+  #    A checkout that took 8s but didn't error is still a real problem worth
+  #    seeing in APM — latency outliers are as diagnostically useful as errors.
+  - name: always-sample-slow-requests
+    type: latency
+    latency:
+      threshold_ms: 2000
+
+  # 3. Everything else (successful, normal-latency traffic): keep 10%.
+  #    Rationale: at any real scale, most successful fast requests look alike —
+  #    keeping 100% balloons Elasticsearch storage/cost for very little added
+  #    diagnostic value. 10% is a defensible starting point, not a magic number;
+  #    in production you'd tune this against actual trace volume, retention
+  #    budget, and whether p50/p95 dashboards still look statistically stable
+  #    at that sampling rate.
+  - name: sample-10pct-successful
+    type: probabilistic
+    probabilistic:
+      sampling_percentage: 10
+
+  # 4. Always keep traces touching checkout/payment, regardless of outcome.
+  #    Business-critical path — worth the extra storage cost to have full
+  #    visibility here even on the "boring" successful cases, since this is
+  #    the flow most likely to be discussed in an incident review.
+  - name: always-sample-checkout-path
+    type: string_attribute
+    string_attribute:
+      key: service.name
+      values: ["checkoutservice", "paymentservice"]
+
+# Policy evaluation order matters: policies are OR'd together — a trace is kept if
+# it matches ANY policy above. Order here is for readability (most-important-first),
+# not evaluation precedence.
