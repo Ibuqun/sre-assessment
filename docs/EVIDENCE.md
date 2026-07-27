@@ -31,6 +31,7 @@ Use this file to capture the final proof points for the SRE assessment.
 - `dashboards/rum-performance.ndjson` imports successfully.
 - `dashboards/business-transactions.ndjson` imports successfully.
 - The imported Kibana dashboards contain live saved-search panels backed by the APM data view.
+- Dashboard panels cover APM transactions/errors, host health, NGINX load-balancer health, network-policy/audit events, RUM Web Vitals, user interactions, checkout/payment traces, custom spans, and custom metrics.
 - `infrastructure/alerting-rules/sre-alerts.ndjson` imports successfully.
 - Alert artifacts cover APM, host, PostgreSQL, Redis, network-policy, and NGINX failure modes.
 

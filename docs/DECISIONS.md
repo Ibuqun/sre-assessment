@@ -32,7 +32,7 @@ RUM is represented as a frontend bootstrap module that initializes Elastic APM R
 
 The RUM integration is split into a static bootstrap script and a frontend template patch. This keeps the browser instrumentation independent of a JavaScript bundler, which matches the upstream Go frontend's static asset model.
 
-The dashboard exports use saved-search panels backed by the APM data view because this format imported reliably through the available Kibana API in the assessment environment. In a production handoff, the same queries would normally be promoted into Lens gauges, percentile charts, and controls for richer visual hierarchy.
+The dashboard exports use saved-search panels backed by the APM data view and infrastructure data streams because this format imported reliably through the available Kibana API in the assessment environment. The panels cover the same operational questions as the requested Lens views: service transactions and errors, RUM Web Vitals and interactions, checkout/payment correlation, custom business metrics, host health, network-policy/audit events, and NGINX load-balancer health. In a production handoff, the same queries would normally be promoted into Lens gauges, percentile charts, maps, and controls for richer visual hierarchy.
 
 ## Kubernetes Patching
 

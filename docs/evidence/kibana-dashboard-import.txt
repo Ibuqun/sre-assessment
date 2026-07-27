@@ -3,14 +3,14 @@ Date: 2026-07-27
 
 Import result:
 - success: true
-- successCount: 12
+- successCount: 20
 - warnings: none
 
 Imported dashboards:
-- service-health: SRE Assessment - Service Health, panel_count=3
-- rum-performance: SRE Assessment - RUM Performance, panel_count=2
-- business-transactions: SRE Assessment - Business Transactions, panel_count=4
+- service-health: SRE Assessment - Service Health, panel_count=6
+- rum-performance: SRE Assessment - RUM Performance, panel_count=5
+- business-transactions: SRE Assessment - Business Transactions, panel_count=6
 
 Panel types:
 - Saved-search dashboard panels backed by the APM data view.
-- Panels use KQL filters for service transactions, service errors, RUM browser transactions, checkout/payment candidate transactions, payment transactions, custom spans, and trace correlation.
+- Panels use KQL filters for service transactions, service errors, host health, NGINX load-balancer health, network-policy/audit events, RUM browser transactions, RUM Web Vitals, navigation timing, user interactions, checkout/payment candidate transactions, custom metrics, custom spans, and trace correlation.
