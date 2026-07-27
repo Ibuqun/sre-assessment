@@ -1,0 +1,15 @@
+# Raises cartservice memory so checkout traces are not interrupted by OOMKills.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartservice
+spec:
+  template:
+    spec:
+      containers:
+        - name: server
+          resources:
+            requests:
+              memory: 128Mi
+            limits:
+              memory: 256Mi

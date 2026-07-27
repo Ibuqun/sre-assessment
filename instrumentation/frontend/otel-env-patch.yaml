@@ -1,0 +1,23 @@
+# Enables frontend OpenTelemetry export through the node-local collector agent.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    spec:
+      containers:
+        - name: server
+          env:
+            - name: ENABLE_TRACING
+              value: "1"
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: COLLECTOR_SERVICE_ADDR
+              value: "$(HOST_IP):4317"
+            - name: OTEL_SERVICE_NAME
+              value: "frontend"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.version=1.0.0,deployment.environment=assessment"
