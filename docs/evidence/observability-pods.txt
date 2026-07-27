@@ -1,0 +1,4 @@
+NAME                                                    READY   STATUS    RESTARTS         AGE     IP            NODE                           NOMINATED NODE   READINESS GATES
+otel-agent-opentelemetry-collector-agent-8rtkk          1/1     Running   15 (3h31m ago)   4h26m   10.244.0.33   sre-assessment-control-plane   <none>           <none>
+otel-gateway-opentelemetry-collector-5f7866848d-jtn4d   1/1     Running   0                52m     10.244.0.57   sre-assessment-control-plane   <none>           <none>
+otel-gateway-opentelemetry-collector-5f7866848d-vhwx6   1/1     Running   0                52m     10.244.0.58   sre-assessment-control-plane   <none>           <none>

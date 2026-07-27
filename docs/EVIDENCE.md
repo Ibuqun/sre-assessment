@@ -38,3 +38,35 @@ Use this file to capture the final proof points for the SRE assessment.
 - Tail sampling keeps high-value traces while limiting storage growth from normal successful traffic.
 - Explicit `OTEL_SERVICE_NAME` prevents OpenTelemetry fallback service names in Kibana.
 - Source instrumentation is stored as patches because the upstream application checkout is not part of this assessment repo.
+
+## Captured Evidence
+
+### Generated Traffic
+
+Fresh traffic was generated through browser browsing, add-to-cart, checkout, and curl requests against the port-forwarded frontend.
+
+### Kubernetes
+
+[Observability pods](./evidence/observability-pods.txt)
+
+[Boutique pods](./evidence/boutique-pods.txt)
+
+[Observability services](./evidence/observability-services.txt)
+
+[Boutique services](./evidence/boutique-services.txt)
+
+[Gateway error check](./evidence/gateway-errors.txt)
+
+[Gateway log summary](./evidence/gateway-log-summary.txt)
+
+### Kibana APM
+
+![APM services](./evidence/apm-services.png)
+
+![Checkout trace](./evidence/checkout-trace.png)
+
+![Frontend overview](./evidence/frontend-overview.png)
+
+![Paymentservice overview](./evidence/paymentservice-overview.png)
+
+![Recommendationservice overview](./evidence/recommendationservice-overview.png)

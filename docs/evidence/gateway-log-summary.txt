@@ -1,0 +1,1 @@
+No gateway exporter auth/drop errors after API key fix and fresh checkout traffic.

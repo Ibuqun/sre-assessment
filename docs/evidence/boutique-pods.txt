@@ -1,0 +1,18 @@
+NAME                                     READY   STATUS    RESTARTS        AGE     IP            NODE                           NOMINATED NODE   READINESS GATES
+adservice-748f6f68d4-24lfn               1/1     Running   0               6h8m    10.244.0.6    sre-assessment-control-plane   <none>           <none>
+cartservice-55745777dd-2684m             1/1     Running   0               3h20m   10.244.0.44   sre-assessment-control-plane   <none>           <none>
+checkoutservice-8458467c66-7nhc5         1/1     Running   0               6h8m    10.244.0.12   sre-assessment-control-plane   <none>           <none>
+currencyservice-64b75b748-ph5n8          1/1     Running   1 (95m ago)     6h8m    10.244.0.7    sre-assessment-control-plane   <none>           <none>
+emailservice-76c84c79d6-kfxb6            1/1     Running   8 (5h22m ago)   6h8m    10.244.0.13   sre-assessment-control-plane   <none>           <none>
+frontend-88d966b44-ccjm7                 1/1     Running   0               3h      10.244.0.48   sre-assessment-control-plane   <none>           <none>
+loadgenerator-549c665d59-wl2t4           1/1     Running   0               6h8m    10.244.0.10   sre-assessment-control-plane   <none>           <none>
+paymentservice-65d995dd8b-5nn6x          1/1     Running   4 (33m ago)     3h      10.244.0.49   sre-assessment-control-plane   <none>           <none>
+pg-postgresql-0                          1/1     Running   0               5h46m   10.244.0.18   sre-assessment-control-plane   <none>           <none>
+productcatalogservice-7dd48bf974-9qcl5   1/1     Running   0               6h8m    10.244.0.16   sre-assessment-control-plane   <none>           <none>
+recommendationservice-5d575f4fb9-gdxlr   1/1     Running   10 (164m ago)   3h      10.244.0.50   sre-assessment-control-plane   <none>           <none>
+redis-cart-788fbddc7-7tmv9               1/1     Running   0               6h8m    10.244.0.9    sre-assessment-control-plane   <none>           <none>
+redis-master-0                           1/1     Running   0               5h45m   10.244.0.21   sre-assessment-control-plane   <none>           <none>
+redis-replicas-0                         1/1     Running   0               5h45m   10.244.0.22   sre-assessment-control-plane   <none>           <none>
+redis-replicas-1                         1/1     Running   0               5h43m   10.244.0.24   sre-assessment-control-plane   <none>           <none>
+redis-replicas-2                         1/1     Running   0               5h43m   10.244.0.26   sre-assessment-control-plane   <none>           <none>
+shippingservice-768bf5c46b-5rd59         1/1     Running   0               6h8m    10.244.0.15   sre-assessment-control-plane   <none>           <none>
