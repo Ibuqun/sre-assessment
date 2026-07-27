@@ -112,6 +112,12 @@ The files include metrics and logs for troubleshooting.
 
 Examples are PostgreSQL logs, Redis slowlog data, and NGINX access/error logs.
 
+These files are deployable artifacts, not proof of live database ingestion.
+
+Fleet enrollment, VM access, database credentials, and component log paths must exist before live verification.
+
+The live verification for this run covered APM, RUM intake, dashboard imports, and Kibana rule creation.
+
 Alerting uses more than one signal.
 
 APM rules catch checkout and payment impact.

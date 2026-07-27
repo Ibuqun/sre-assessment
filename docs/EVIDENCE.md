@@ -42,6 +42,13 @@ Use this file for final proof points.
 - `infrastructure/redis-integration/redis.yml` defines Redis metrics and slowlog collection.
 - `infrastructure/nginx-integration/nginx.yml` defines NGINX metrics, access logs, and error logs.
 
+Live verification boundary:
+
+- PostgreSQL, Redis, NGINX, host, and network-policy files are deployable monitoring artifacts.
+- They were not live-deployed through Fleet during this run.
+- No live PostgreSQL or Redis metric documents were proved in Kibana.
+- The live-verified items are APM traces, RUM intake, dashboard imports, and Kibana alert rule creation.
+
 ## Review Talking Points
 
 - Agent/gateway topology separates node-local intake from central export and sampling.

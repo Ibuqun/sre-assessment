@@ -107,7 +107,7 @@ During review, walk through these checks:
 3. Checkout traces flow through frontend, cart, checkout, payment, and downstream services.
 4. Error and slow traces are retained by the gateway tail-sampling policy.
 5. Collector self-metrics are exposed on port `8888`.
-6. Infrastructure files show how Elastic Agent collects host, Kubernetes, Postgres, Redis, and NGINX data.
+6. Infrastructure files show how Elastic Agent will collect host, Kubernetes, Postgres, Redis, and NGINX data after deployment.
 7. Alert rules cover application, host, database, cache, network-policy, and load-balancer failure modes.
 8. `docs/EVIDENCE.md` contains the final checklist and screenshots.
 
