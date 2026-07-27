@@ -30,8 +30,6 @@ The Kubernetes Secret stores the Elastic API key from Kibana.
 
 The gateway uses `Authorization: ApiKey ${env:ELASTIC_APM_API_KEY}`.
 
-An APM secret token uses a `Bearer` header instead.
-
 ## Tail Sampling
 
 Tail sampling runs at the gateway because sampling needs the complete trace.
@@ -53,14 +51,6 @@ The repo contains instrumentation artifacts for three languages:
 - Go frontend checkout spans and checkout metrics.
 - Node.js payment authorization spans, card validation spans, and payment metrics.
 - C# cart operation spans and a cart item counter.
-
-## Repository Boundary
-
-The upstream `microservices-demo/` checkout is not part of this repo.
-
-Source instrumentation is stored as patch files under `instrumentation/<service>/`.
-
-This keeps the changes reviewable without vendoring the application source.
 
 ## Service Naming
 
@@ -135,5 +125,3 @@ Network-policy rules catch unexpected egress.
 NGINX rules catch load-balancer and upstream availability symptoms.
 
 The rule exports omit connector secrets.
-
-Actions can be connected to Slack, webhook, or email in Kibana.
