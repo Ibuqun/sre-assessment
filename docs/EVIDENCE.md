@@ -85,3 +85,11 @@ Fresh traffic was generated through browser browsing, add-to-cart, checkout, and
 ![Paymentservice overview](./evidence/paymentservice-overview.png)
 
 ![Recommendationservice overview](./evidence/recommendationservice-overview.png)
+
+### Kibana Dashboards
+
+![Service health dashboard](./evidence/kibana-service-health-dashboard.png)
+
+![RUM performance dashboard](./evidence/kibana-rum-performance-dashboard.png)
+
+![Business transactions dashboard](./evidence/kibana-business-transactions-dashboard.png)
