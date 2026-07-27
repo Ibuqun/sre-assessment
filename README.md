@@ -1,6 +1,6 @@
 # SRE Assessment
 
-This repository contains the observability configuration and assessment artifacts for the Online Boutique deployment.
+This repository contains the observability configuration and assessment artifacts for Google's Online Boutique deployment: OpenTelemetry Collector gateway/agent values, service instrumentation patches, Elastic APM RUM, Kibana dashboards, and infrastructure monitoring via Elastic Agent/Fleet.
 
 ## Layout
 
