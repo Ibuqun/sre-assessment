@@ -1,0 +1,23 @@
+Kibana alert rule verification
+Date: 2026-07-27
+
+Created through the Kibana rule API:
+- Checkout errors detected
+- Payment latency above 2s
+- Host CPU sustained above 85%
+- Host disk free below 10%
+- Host available memory below 500MB
+- PostgreSQL connections above 80%
+- PostgreSQL cache hit ratio below 95%
+- Redis memory above 85%
+- Redis eviction rate detected
+- Unexpected network egress detected
+- NGINX 5xx response detected
+- NGINX upstream unavailable 502/503
+
+Result:
+- All 12 API calls returned HTTP 200.
+- All 12 enable calls returned HTTP 204.
+- The Kibana rule API returned enabled=true for the checkout rule.
+- Rules have no connector actions in the export.
+- Connector secrets must be added in the target Kibana space.

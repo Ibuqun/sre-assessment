@@ -2,46 +2,138 @@
 
 ## Collector Topology
 
-The OpenTelemetry Collector is deployed as an agent DaemonSet plus a gateway Deployment. Application telemetry is sent to the node-local agent on `$(HOST_IP):4317`, where host metrics and Kubernetes resource enrichment are cheap and close to the workload. The agent forwards to the central gateway, which owns Elastic export and tail-based sampling.
+The OpenTelemetry Collector uses an agent and gateway topology.
 
-The agent ClusterRole explicitly grants read access to Kubernetes `nodes` because the `resourcedetection` processor's Kubernetes API detector needs node metadata such as `k8s.node.uid`. The Helm chart's `kubernetesAttributes` preset only grants pods, namespaces, and replicasets, so without this rule the agent exits during startup with `nodes is forbidden`.
+The agent runs as a DaemonSet.
+
+The gateway runs as a Deployment.
+
+Applications send telemetry to the node-local agent on `$(HOST_IP):4317`.
+
+The agent adds Kubernetes metadata and forwards data to the gateway.
+
+The gateway exports to Elastic and runs tail sampling.
+
+The agent ClusterRole grants read access to Kubernetes `nodes`.
+
+The `resourcedetection` processor needs node metadata such as `k8s.node.uid`.
+
+The Helm chart preset grants pods, namespaces, and replicasets only.
+
+Without the extra rule, the agent exits with `nodes is forbidden`.
 
 ## Elastic APM Authentication
 
-Elastic Cloud APM is reached through the managed HTTPS endpoint on port 443. The Kubernetes Secret stores the Elastic API key created from Kibana, so the gateway uses `Authorization: ApiKey ${env:ELASTIC_APM_API_KEY}`. This differs from an APM secret token, which would use a `Bearer` authorization header.
+Elastic Cloud APM uses the managed HTTPS endpoint on port 443.
+
+The Kubernetes Secret stores the Elastic API key from Kibana.
+
+The gateway uses `Authorization: ApiKey ${env:ELASTIC_APM_API_KEY}`.
+
+An APM secret token uses a `Bearer` header instead.
 
 ## Tail Sampling
 
-Tail sampling is configured at the gateway because sampling decisions need the complete trace. Error traces, slow traces, and checkout/payment traces are always retained; normal successful traffic is sampled at 10% to control Elasticsearch storage and ingestion cost.
+Tail sampling runs at the gateway because sampling needs the complete trace.
+
+The policy always keeps error traces, slow traces, and checkout/payment traces.
+
+It samples normal successful traffic at 10%.
+
+This lowers storage and ingest cost.
 
 ## Current Scope
 
-The collector pipeline has been smoke-tested with a synthetic `test-service` span and live Online Boutique services have tracing enabled for `frontend`, `recommendationservice`, and `paymentservice`. The committed instrumentation artifacts focus on three assessment languages: frontend Go checkout spans and checkout-attempt metrics, paymentservice Node.js payment authorization/card-validation spans and payment metrics, and cartservice C# cart operation spans with a cart-items-added metric.
+The collector pipeline was smoke-tested with a synthetic `test-service` span.
+
+Live Online Boutique tracing was enabled for `frontend`, `recommendationservice`, and `paymentservice`.
+
+The repo contains instrumentation artifacts for three languages:
+
+- Go frontend checkout spans and checkout metrics.
+- Node.js payment authorization spans, card validation spans, and payment metrics.
+- C# cart operation spans and a cart item counter.
 
 ## Repository Boundary
 
-The upstream `microservices-demo/` checkout is kept out of the assessment repository. Source-level instrumentation is stored as patch files under `instrumentation/<service>/` so the changes remain reviewable without vendoring the application source.
+The upstream `microservices-demo/` checkout is not part of this repo.
+
+Source instrumentation is stored as patch files under `instrumentation/<service>/`.
+
+This keeps the changes reviewable without vendoring the application source.
 
 ## Service Naming
 
-Each instrumented deployment sets `OTEL_SERVICE_NAME` explicitly. This prevents Elastic APM from grouping spans under OpenTelemetry fallback names such as `unknown_service` or `unknown_service_server`.
+Each instrumented deployment sets `OTEL_SERVICE_NAME`.
+
+This prevents fallback service names such as `unknown_service` or `unknown_service_server`.
 
 ## RUM and Dashboards
 
-RUM is represented as a frontend bootstrap module that initializes Elastic APM RUM with the assessment environment and service version. Kibana dashboards and alerting rules are committed as saved-object NDJSON artifacts so they can be imported, reviewed, and versioned with the rest of the observability configuration.
+RUM is a frontend bootstrap module.
 
-The RUM integration is split into a static bootstrap script and a frontend template patch. This keeps the browser instrumentation independent of a JavaScript bundler, which matches the upstream Go frontend's static asset model.
+It initializes Elastic APM RUM with the assessment environment and service version.
 
-The dashboard exports use saved-search panels backed by the APM data view and infrastructure data streams because this format imported reliably through the available Kibana API in the assessment environment. The panels cover the same operational questions as the requested Lens views: service transactions and errors, RUM Web Vitals and interactions, checkout/payment correlation, custom business metrics, host health, network-policy/audit events, and NGINX load-balancer health. In a production handoff, the same queries would normally be promoted into Lens gauges, percentile charts, maps, and controls for richer visual hierarchy.
+Kibana dashboards and alert rules are committed as NDJSON files.
+
+The files can be imported, reviewed, and versioned with the other observability files.
+
+The RUM integration has two parts.
+
+The first part is a static bootstrap script.
+
+The second part is a frontend template patch.
+
+This matches the static asset model of the upstream Go frontend.
+
+The dashboard exports use saved-search panels.
+
+This format imported reliably through the available Kibana API.
+
+The panels cover service errors, RUM Web Vitals, checkout/payment correlation, custom metrics, host health, network events, and NGINX health.
+
+In production, these queries can become Lens gauges, percentile charts, maps, and controls.
 
 ## Kubernetes Patching
 
-The service overlay files are strategic-merge patches for existing Online Boutique Deployments. Strategic merge is used because Kubernetes can merge container entries by name instead of replacing the whole container list. This keeps the patches small and avoids copying unrelated deployment settings from the upstream manifests.
+The service overlay files are strategic-merge patches.
+
+Kubernetes can merge container entries by name.
+
+This keeps the patches small.
+
+It also avoids copying unrelated deployment fields from upstream manifests.
 
 ## Infrastructure Monitoring
 
-Elastic Agent policy artifacts are used for host and infrastructure monitoring because the assessment backend is Elastic/Fleet-centered and the same policy can be enrolled on the bastion, CI runner, or cluster nodes without committing credentials. The policy includes system metrics/logs, Kubernetes container logs, Kubernetes audit logs, and CNI flow-log style inputs for network-policy auditing.
+Elastic Agent policy files are used for host and infrastructure monitoring.
 
-PostgreSQL, Redis, and NGINX are split into separate integration files so each can be reviewed and tuned independently. Metrics and logs are both represented where the assessment requires operational troubleshooting, such as PostgreSQL slow-query logs, Redis slowlog data, and NGINX access/error logs.
+The same policy can enroll the bastion, CI runner, or cluster nodes.
 
-Alerting is intentionally multi-signal: APM rules catch checkout/payment user impact, host rules catch compute saturation, data-store rules catch capacity and performance degradation, network-policy rules catch unexpected egress, and NGINX rules catch load-balancer and upstream availability symptoms. The committed rule exports omit connector secrets; actions can be wired to Slack/webhook/email in the target Kibana space.
+Credentials are not committed.
+
+The policy includes system metrics, system logs, Kubernetes logs, audit logs, and flow-log inputs.
+
+PostgreSQL, Redis, and NGINX have separate integration files.
+
+This makes each integration easier to review and tune.
+
+The files include metrics and logs for troubleshooting.
+
+Examples are PostgreSQL logs, Redis slowlog data, and NGINX access/error logs.
+
+Alerting uses more than one signal.
+
+APM rules catch checkout and payment impact.
+
+Host rules catch compute saturation.
+
+Data-store rules catch capacity and performance issues.
+
+Network-policy rules catch unexpected egress.
+
+NGINX rules catch load-balancer and upstream availability symptoms.
+
+The rule exports omit connector secrets.
+
+Actions can be connected to Slack, webhook, or email in Kibana.

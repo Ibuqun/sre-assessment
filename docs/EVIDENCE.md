@@ -1,6 +1,6 @@
 # Assessment Evidence Checklist
 
-Use this file to capture the final proof points for the SRE assessment.
+Use this file for final proof points.
 
 ## Collector
 
@@ -31,26 +31,26 @@ Use this file to capture the final proof points for the SRE assessment.
 - `dashboards/rum-performance.ndjson` imports successfully.
 - `dashboards/business-transactions.ndjson` imports successfully.
 - The imported Kibana dashboards contain live saved-search panels backed by the APM data view.
-- Dashboard panels cover APM transactions/errors, host health, NGINX load-balancer health, network-policy/audit events, RUM Web Vitals, user interactions, checkout/payment traces, custom spans, and custom metrics.
+- Dashboard panels cover APM data, host health, NGINX health, network events, RUM data, custom spans, and custom metrics.
 - `infrastructure/alerting-rules/sre-alerts.ndjson` imports successfully.
 - Alert artifacts cover APM, host, PostgreSQL, Redis, network-policy, and NGINX failure modes.
 
 ## Infrastructure Monitoring
 
-- `infrastructure/elastic-agent-policies/agent.yml` defines system metrics/logs, Kubernetes container logs, Kubernetes audit logs, and network-policy flow-log inputs.
+- `infrastructure/elastic-agent-policies/agent.yml` defines host data, Kubernetes logs, audit logs, and flow-log inputs.
 - `infrastructure/postgres-integration/postgres.yml` defines PostgreSQL metrics and log collection.
 - `infrastructure/redis-integration/redis.yml` defines Redis metrics and slowlog collection.
 - `infrastructure/nginx-integration/nginx.yml` defines NGINX metrics, access logs, and error logs.
 
 ## Review Talking Points
 
-- Agent/gateway topology separates node-local telemetry intake from centralized export and sampling.
+- Agent/gateway topology separates node-local intake from central export and sampling.
 - API key authentication uses `Authorization: ApiKey ...`; APM secret tokens would use `Bearer ...`.
-- Tail sampling keeps high-value traces while limiting storage growth from normal successful traffic.
+- Tail sampling keeps high-value traces and samples normal successful traffic.
 - Explicit `OTEL_SERVICE_NAME` prevents OpenTelemetry fallback service names in Kibana.
-- Source instrumentation is stored as patches because the upstream application checkout is not part of this assessment repo.
+- Source instrumentation is stored as patches because the upstream checkout is not part of this repo.
 - The instrumentation artifacts cover three languages: Go frontend, Node.js paymentservice, and C# cartservice.
-- Alerting is split by symptom: user-impacting APM failures, host saturation, data-store pressure, unexpected egress, and load-balancer upstream failures.
+- Alerting is split by symptom: APM failures, host saturation, data-store pressure, unexpected egress, and load-balancer failures.
 
 ## Captured Evidence
 
@@ -85,6 +85,8 @@ Fresh traffic was generated through browser browsing, add-to-cart, checkout, and
 [Kibana dashboard import verification](./evidence/kibana-dashboard-import.txt)
 
 [Elastic RUM intake verification](./evidence/rum-intake-verification.txt)
+
+[Kibana alert rule verification](./evidence/kibana-alert-rules.txt)
 
 ### Kibana APM
 

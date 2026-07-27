@@ -1,6 +1,15 @@
 # SRE Assessment
 
-This repository contains the observability configuration and assessment artifacts for Google's Online Boutique deployment: OpenTelemetry Collector gateway/agent values, service instrumentation patches, Elastic APM RUM, Kibana dashboards, and infrastructure monitoring via Elastic Agent/Fleet.
+This repository contains the observability files for Google Online Boutique.
+
+It includes these artifacts:
+
+- OpenTelemetry Collector values for the agent and gateway.
+- Source patches for service instrumentation.
+- Elastic APM RUM bootstrap code.
+- Kibana dashboard exports.
+- Elastic Agent files for infrastructure monitoring.
+- Kibana alert rule exports.
 
 ## Layout
 
@@ -45,7 +54,7 @@ kubectl patch deploy cartservice -n boutique --type strategic --patch-file instr
 kubectl patch deploy cartservice -n boutique --type strategic --patch-file instrumentation/cartservice/stability-patch.yaml
 ```
 
-Apply source-level patches to the upstream Online Boutique checkout/payment/cart services when rebuilding service images:
+Apply the source patches before you rebuild the service images:
 
 ```bash
 git -C microservices-demo apply ../instrumentation/frontend/custom-checkout-span.patch
@@ -59,31 +68,65 @@ cp rum/browser-rum.js microservices-demo/src/frontend/static/rum.js
 
 Import saved objects from `dashboards/*.ndjson` and `infrastructure/alerting-rules/*.ndjson`.
 
-After generating fresh traffic, use a short time range such as Last 15 minutes and verify that new traces appear under `frontend` and `paymentservice`. Older `unknown_service` entries can remain visible if the selected time window includes data from before `OTEL_SERVICE_NAME` was added.
+After you generate traffic, set the time range to Last 15 minutes.
 
-The alert export includes APM rules for checkout and payment, plus ES query rules for host CPU/disk/memory, PostgreSQL connection/cache health, Redis memory/evictions, Kubernetes network-policy egress, and NGINX 5xx/upstream failures.
+Make sure that new traces appear under `frontend` and `paymentservice`.
+
+Older `unknown_service` entries can remain visible in older time ranges.
+
+Those entries came from traffic before `OTEL_SERVICE_NAME` was set.
+
+The alert export includes APM rules for checkout and payment.
+
+It also includes ES query rules for these failure modes:
+
+- Host CPU, disk, and memory pressure.
+- PostgreSQL connection and cache pressure.
+- Redis memory pressure and evictions.
+- Kubernetes network-policy egress.
+- NGINX 5xx and upstream failures.
 
 ## RUM
 
-Wire `rum/browser-rum.js` into the frontend bundle and set `window.__ELASTIC_APM_RUM_SERVER_URL__` to the Elastic APM RUM endpoint.
+Add `rum/browser-rum.js` to the frontend bundle.
 
-For the upstream Go frontend, apply `instrumentation/frontend/rum-template.patch` and copy `rum/browser-rum.js` to `microservices-demo/src/frontend/static/rum.js` before rebuilding the frontend image.
+Set `window.__ELASTIC_APM_RUM_SERVER_URL__` to the Elastic APM RUM endpoint.
+
+For the upstream Go frontend, apply `instrumentation/frontend/rum-template.patch`.
+
+Then copy `rum/browser-rum.js` to `microservices-demo/src/frontend/static/rum.js`.
+
+Then rebuild the frontend image.
 
 ## What to Demonstrate
 
 During review, walk through these checks:
 
 1. `frontend` and `paymentservice` appear as named APM services after fresh traffic.
-2. Frontend, paymentservice, and cartservice have language-specific instrumentation patches with business spans and metrics.
+2. The repo has instrumentation patches for Go, Node.js, and C# services.
 3. Checkout traces flow through frontend, cart, checkout, payment, and downstream services.
 4. Error and slow traces are retained by the gateway tail-sampling policy.
 5. Collector self-metrics are exposed on port `8888`.
-6. Infrastructure files show how host metrics, Kubernetes logs/audit/flow logs, Postgres, Redis, and NGINX metrics/logs would be collected by Elastic Agent.
+6. Infrastructure files show how Elastic Agent collects host, Kubernetes, Postgres, Redis, and NGINX data.
 7. Alert rules cover application, host, database, cache, network-policy, and load-balancer failure modes.
-8. `docs/EVIDENCE.md` contains the final checklist for screenshots and live verification notes.
+8. `docs/EVIDENCE.md` contains the final checklist and screenshots.
 
 ## Key Tradeoffs
 
-The node-local collector agent gives each workload a nearby OTLP endpoint and handles Kubernetes enrichment close to the pod. The gateway centralizes Elastic export and tail sampling because it sees complete traces. Normal successful traffic is sampled to control storage cost, while errors, slow requests, and checkout/payment traces are retained because they carry the most incident value.
+The node-local collector agent gives each workload a nearby OTLP endpoint.
 
-Elastic Agent configuration is committed as reusable policy YAML rather than embedding credentials. The policy separates system metrics/logs, Kubernetes container logs, audit/flow logs, and component-specific integrations so each signal lands in a predictable dataset.
+It also adds Kubernetes metadata close to the pod.
+
+The gateway exports to Elastic and runs tail sampling.
+
+Tail sampling runs at the gateway because the gateway sees complete traces.
+
+Normal successful traffic is sampled at 10%.
+
+Errors, slow requests, and checkout/payment traces are always retained.
+
+Elastic Agent configuration is committed as policy YAML.
+
+Credentials stay outside the repo.
+
+The policy separates host data, Kubernetes logs, audit logs, flow logs, and component data.
