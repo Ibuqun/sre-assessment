@@ -6,6 +6,14 @@ presets:
     enabled: true
   kubernetesAttributes:
     enabled: true
+clusterRole:
+  rules:
+    # Required by the resourcedetection processor's k8s_api detector to read
+    # node metadata such as k8s.node.uid. The kubernetesAttributes preset only
+    # grants pod/namespace/replicaset access, so this has to be explicit.
+    - apiGroups: [""]
+      resources: ["nodes"]
+      verbs: ["get", "list", "watch"]
 config:
   receivers:
     otlp:
@@ -37,8 +45,9 @@ config:
       send_batch_size: 1000
       timeout: 10s
   exporters:
+    # Helm renders the gateway service as <release>-opentelemetry-collector.
     otlp/gateway:
-      endpoint: "otel-gateway-collector.observability.svc.cluster.local:4317"
+      endpoint: "otel-gateway-opentelemetry-collector.observability.svc.cluster.local:4317"
       tls:
         insecure: true   # internal cluster hop only; TLS terminates at the gateway->APM leg
   service:
@@ -57,4 +66,10 @@ config:
         exporters: [otlp/gateway]
     telemetry:
       metrics:
-        address: 0.0.0.0:8888   # collector's own health metrics — "monitoring the monitoring"
+        # Collector self-monitoring metrics exposed on :8888.
+        readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: 0.0.0.0
+                  port: 8888
